@@ -1,62 +1,80 @@
 # OpenHands IDE Bridge 🌉
 
-A lightweight, zero-configuration local proxy server that allows **OpenHands** to run on your system's native/IDE-licensed LLMs (e.g., Gemini, Claude, or GPT) instead of requiring direct LLM API keys.
+> **Are you tired of getting your API keys exhausted by OpenHands?**  
+> Meet the solution that routes OpenHands calls directly to your **IDE's native LLM**—no extra API keys, no usage limits, and completely free.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Yuggohel2/openhands-ide-bridge/pulls)
 
 ---
 
-## How It Works
+## 🛑 The Problem
+Running agentic systems like **OpenHands** locally is incredibly powerful, but it can quickly consume thousands of tokens, exhausting your paid LLM API keys (OpenAI, Anthropic, etc.) in a matter of minutes. At the same time, you already have an AI-powered IDE or chat assistant with active, high-quality models (Gemini, Claude, GPT-4) running right on your desktop.
 
-1. **Proxy HTTP Server:** Runs on your host machine (default port `9999`) and intercepts standard OpenAI-compatible `/chat/completions` HTTP requests sent by OpenHands.
-2. **File-Based Communication:** For each request, the proxy creates a temporary JSON file (`llm_request_<id>.json`) in your local `.openhands/` directory.
-3. **IDE Processing:** Your active IDE coding assistant (which has native access to LLMs) detects the file, calls the LLM, writes the output to `llm_response_<id>.json`, and cleans up.
-4. **Transparent Interface:** The proxy reads the response and returns it to OpenHands as a standard HTTP response.
+## 💡 The Solution
+The **OpenHands IDE Bridge** is a lightweight, zero-configuration local proxy server. It intercepts standard OpenAI-compatible `/chat/completions` API calls sent by OpenHands and translates them into local file exchanges (`llm_request_*.json` / `llm_response_*.json`) inside the standard `~/.openhands/` directory.
 
-This means **no code modifications** are required inside OpenHands. It behaves exactly as if it was calling a direct OpenAI API, but uses your local/IDE LLM for free.
+Any active IDE assistant or local agent running on your host machine can then intercept these requests, solve them using its native LLM access, and write back the response—giving OpenHands full agentic capabilities **without spending a single cent on raw API keys**.
 
 ---
 
-## Installation & Running
+## 🔌 Supported IDEs & Extensions
 
-### 1. Start the Proxy Server
-Run the proxy server on your host machine:
+This bridge is compatible with any editor, environment, or extension that can hook into the standard file-based polling protocol in your `~/.openhands` folder. Examples include:
+
+* **VS Code / Cursor / Windsurf** with custom local agent loops or scripts.
+* **Antigravity / Gemini Code Assist** environments configured to watch local directories for proxy requests.
+* **Continue.dev** or other open-source IDE extensions when integrated with local interceptors.
+* **Custom Desktop Agents** running alongside your development workspace.
+
+*Any IDE or plugin that can read `llm_request_<id>.json`, call its native model (which is already authorized, e.g., to write files, edit code, and execute terminal commands), and output `llm_response_<id>.json` can drive the OpenHands sandbox seamlessly.*
+
+---
+
+## 🚀 Quick Start
+
+### 1. Run the Proxy Server
+Run the proxy server on your host machine (where your IDE is running):
 
 ```bash
 # Clone the repository
 git clone https://github.com/Yuggohel2/openhands-ide-bridge.git
 cd openhands-ide-bridge
 
-# Run the proxy (it will start on port 9999)
+# Start the proxy (runs on port 9999 by default)
 python llm_proxy.py
 ```
 
 ### 2. Configure OpenHands
-Start OpenHands by pointing its LLM settings to the proxy server:
+Launch OpenHands and tell it to send its API requests to the proxy:
 
 #### A. If Running OpenHands in Docker (Recommended)
-Set the environment variables when executing the `docker run` command. Note that inside Docker, `host.docker.internal` is used to refer to your host computer:
+Add these environment variables when starting your container. Inside Docker, `host.docker.internal` allows the container to talk to the proxy running on your host:
 
 ```bash
 docker run -it \
   -e LLM_BASE_URL="http://host.docker.internal:9999/v1" \
-  -e LLM_MODEL="openai/custom-model" \
+  -e LLM_MODEL="openai/native-ide-model" \
   -e LLM_API_KEY="not-needed" \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/all-in-ai/openhands:0.9
 ```
 
-#### B. If Using the OpenHands Web UI Settings
-In the OpenHands Web UI settings panel:
+#### B. If Configuring via the OpenHands Web UI
+Simply enter the following details in the settings panel:
 * **Language Model Provider:** `OpenAI (Compatible)`
-* **Model Name:** `custom-model`
+* **Model Name:** `native-ide-model`
 * **API Base URL:** `http://host.docker.internal:9999/v1`
 * **API Key:** `dummy`
 
 ---
 
-## Port Customization
-By default, the proxy runs on port `9999`. If this port is occupied, it will automatically attempt to bind to the next free port. 
+## ⚙️ Advanced Customization
 
-If you want to force a custom port, set the `LLM_PROXY_PORT` environment variable before running:
+### Port Binding
+If port `9999` is occupied, the proxy will automatically bind to the next free port (e.g. `9998`, `9997`). 
+
+To override this and force a specific port, set the `LLM_PROXY_PORT` environment variable:
 ```bash
 # Windows (PowerShell)
 $env:LLM_PROXY_PORT=8888
@@ -68,5 +86,5 @@ LLM_PROXY_PORT=8888 python llm_proxy.py
 
 ---
 
-## License
-MIT License. See [LICENSE](LICENSE) for details.
+## 📄 License
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.

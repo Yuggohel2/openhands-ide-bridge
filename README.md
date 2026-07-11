@@ -18,6 +18,18 @@ Any active IDE assistant or local agent running on your host machine can then in
 
 ---
 
+## ⚡ Save Up to 80% More Tokens with Hercules MCP!
+If you want to optimize your token efficiency even further when running local agents, check out the parent project: **[Hercules MCP](https://github.com/Yuggohel2/hercules-mcp)**.
+
+Hercules MCP integrates OpenHands with a **Code Review Graph** database and token-saving rules:
+* **Graph-First Analysis:** Avoids listing full directories or scanning entire files. It queries a localized graph structure to locate exact dependencies.
+* **Smart Context Archiving:** Automatically packages and archives task logs to prevent context bloat.
+* **Token Savings:** Saves up to **75% to 80% of your LLM tokens** per session by restricting context retrieval to narrow, relevant scopes.
+
+Check out the [Hercules MCP Repository](https://github.com/Yuggohel2/hercules-mcp) to supercharge your local agent setup!
+
+---
+
 ## 🔌 Supported IDEs & Extensions
 
 This bridge is compatible with any editor, environment, or extension that can hook into the standard file-based polling protocol in your `~/.openhands` folder. Examples include:

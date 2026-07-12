@@ -43,6 +43,18 @@ This bridge is compatible with any editor, environment, or extension that can ho
 
 ---
 
+## 🤖 Cooperative Agent Swarms (The Brain & The Builder)
+
+By running the included **MCP (Model Context Protocol) Server**, you unlock a powerful collaborative workflow where your IDE assistant and OpenHands work together:
+
+1. **The Brain (IDE LLM):** Acts as the Architect. It plans features, designs codebases, and manages task checklists.
+2. **The Builder (OpenHands Sandbox):** Acts as the Operator. When the Brain needs to run bash commands, execute unit tests, or compile code, it delegates the work to OpenHands via MCP tools (`execute_bash`, `run_task`, `create_conversation`).
+3. **Concurrency-Safe Swarms:** Because the proxy isolates concurrent requests using unique UUIDs, you can have your IDE assistant spawn multiple OpenHands tasks or running loops in parallel.
+
+This division of labor keeps your host system safe while letting the AI execute code in a secure sandbox. The rules for establishing this cooperation are defined in [`.agents/AGENTS.md`](.agents/AGENTS.md).
+
+---
+
 ## 🚀 Quick Start
 
 ### 1. Run the Proxy Server
@@ -78,6 +90,24 @@ Simply enter the following details in the settings panel:
 * **Model Name:** `native-ide-model`
 * **API Base URL:** `http://host.docker.internal:9999/v1`
 * **API Key:** `dummy`
+
+### 3. Expose OpenHands to your IDE (Optional MCP Server Setup)
+To allow your IDE assistant to control OpenHands, add the MCP server configuration to your IDE settings (e.g. `mcp_config.json`):
+
+```json
+"openhands": {
+  "command": "uv",
+  "args": [
+    "run",
+    "/absolute/path/to/openhands_mcp.py"
+  ],
+  "env": {
+    "OPENHANDS_URL": "http://localhost:8000"
+  }
+}
+```
+
+Make sure your OpenHands container is running, then your IDE assistant will instantly gain access to the OpenHands tool suite!
 
 ---
 

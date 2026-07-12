@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openhands-ide-bridge"
+version = "0.1.0"
+description = "A local proxy bridge and MCP server connecting OpenHands to native IDE LLMs."
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Yug Gohel", email = "antigravity@gemini.local"}
+]
+dependencies = [
+    "fastmcp",
+    "httpx"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Yuggohel2/openhands-ide-bridge"
+"Bug Tracker" = "https://github.com/Yuggohel2/openhands-ide-bridge/issues"
+
+[project.scripts]
+openhands-ide-proxy = "llm_proxy:run_server"
+openhands-ide-config = "configure:main"
+openhands-ide-mcp = "openhands_mcp:mcp.run"
+
+[tool.setuptools]
+py-modules = ["llm_proxy", "openhands_mcp", "configure"]

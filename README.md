@@ -58,23 +58,26 @@ This division of labor keeps your host system safe while letting the AI execute 
 
 ## 🚀 Quick Start
 
-### 1. Run the Proxy Server
-Run the proxy server on your host machine (where your IDE is running):
+### 1. Installation
+Install the bridge utility directly from GitHub:
 
 ```bash
-# Clone the repository
-git clone https://github.com/Yuggohel2/openhands-ide-bridge.git
-cd openhands-ide-bridge
+pip install git+https://github.com/Yuggohel2/openhands-ide-bridge.git
+```
+This automatically registers the global CLI commands `openhands-ide-proxy`, `openhands-ide-config`, and `openhands-ide-mcp`.
 
-# Start the proxy (runs on port 9999 by default)
-python llm_proxy.py
+### 2. Run the Proxy Server
+Start the proxy server on your host machine:
+
+```bash
+openhands-ide-proxy
 ```
 
-### 2. Monitor Connection Health (Status Dashboard)
+### 3. Monitor Connection Health (Status Dashboard)
 Once the proxy is running, you can visit the local status dashboard in your browser to verify connection health to the OpenHands server:
 👉 **[http://localhost:9999/status](http://localhost:9999/status)**
 
-### 3. Configure OpenHands
+### 4. Configure OpenHands
 Launch OpenHands and tell it to send its API requests to the proxy:
 
 #### A. If Running OpenHands in Docker (Recommended)
@@ -96,31 +99,13 @@ Simply enter the following details in the settings panel:
 * **API Base URL:** `http://host.docker.internal:9999/v1`
 * **API Key:** `dummy`
 
-### 4. Expose OpenHands to your IDE (Optional MCP Server Setup)
-To allow your IDE assistant to control OpenHands, you can run the auto-configuration utility:
+### 5. Expose OpenHands to your IDE (Optional MCP Server Setup)
+To allow your IDE assistant to control OpenHands, run the auto-configuration utility:
 
 ```bash
-# Run the auto-configurator
-python configure.py
+openhands-ide-config
 ```
 This utility automatically detects common MCP client setups (such as VS Code's Cline/Roo-Cline or Claude Desktop) and registers the `openhands` server configuration with the correct script paths.
-
-Alternatively, you can add it manually to your IDE settings (e.g. `mcp_config.json`):
-
-```json
-"openhands": {
-  "command": "uv",
-  "args": [
-    "run",
-    "/absolute/path/to/openhands_mcp.py"
-  ],
-  "env": {
-    "OPENHANDS_URL": "http://localhost:8000"
-  }
-}
-```
-
-Make sure your OpenHands container is running, then your IDE assistant will instantly gain access to the OpenHands tool suite!
 
 ---
 
@@ -133,10 +118,10 @@ To override this and force a specific port, set the `LLM_PROXY_PORT` environment
 ```bash
 # Windows (PowerShell)
 $env:LLM_PROXY_PORT=8888
-python llm_proxy.py
+openhands-ide-proxy
 
 # macOS / Linux / Git Bash
-LLM_PROXY_PORT=8888 python llm_proxy.py
+LLM_PROXY_PORT=8888 openhands-ide-proxy
 ```
 
 ---

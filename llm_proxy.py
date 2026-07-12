@@ -10,6 +10,7 @@ from typing import Any
 PORT = 9999
 USER_DIR = Path.home()
 OPENHANDS_DIR = USER_DIR / ".openhands"
+OPENHANDS_URL = os.getenv("OPENHANDS_URL", "http://localhost:8000")
 
 def safe_write_json(file_path: Path, data: Any):
     """Write JSON file with safety retries to prevent Windows locking/access errors."""
@@ -54,6 +55,144 @@ class LLMProxyHandler(http.server.BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
         self.end_headers()
+
+    def do_GET(self):
+        if self.path in ("/", "/status", "/health"):
+            # Check OpenHands connection health
+            openhands_status = "Unknown"
+            try:
+                import urllib.request
+                # Check connection to OpenHands profiles endpoint
+                with urllib.request.urlopen(f"{OPENHANDS_URL}/api/agent-profiles", timeout=1.0) as conn:
+                    if conn.getcode() == 200:
+                        openhands_status = "Healthy (Connected)"
+            except Exception:
+                openhands_status = "Disconnected (Check Docker/Server)"
+
+            # Serve status HTML page
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            
+            html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenHands IDE Bridge Status 🌉</title>
+    <style>
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }}
+        .card {{
+            background: rgba(22, 27, 34, 0.8);
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            backdrop-filter: blur(8px);
+            max-width: 480px;
+            width: 100%;
+        }}
+        h1 {{
+            font-size: 24px;
+            margin-top: 0;
+            color: #58a6ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }}
+        .status-item {{
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #21262d;
+        }}
+        .status-label {{
+            font-weight: 500;
+            color: #8b949e;
+        }}
+        .badge {{
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }}
+        .badge.online {{
+            background-color: rgba(56, 139, 253, 0.15);
+            color: #58a6ff;
+            border: 1px solid rgba(56, 139, 253, 0.4);
+        }}
+        .badge.healthy {{
+            background-color: rgba(46, 160, 67, 0.15);
+            color: #3fb950;
+            border: 1px solid rgba(46, 160, 67, 0.4);
+        }}
+        .badge.warning {{
+            background-color: rgba(210, 153, 34, 0.15);
+            color: #d29922;
+            border: 1px solid rgba(210, 153, 34, 0.4);
+        }}
+        .footer {{
+            font-size: 12px;
+            color: #484f58;
+            text-align: center;
+            margin-top: 25px;
+        }}
+        a {{
+            color: #58a6ff;
+            text-decoration: none;
+        }}
+        a:hover {{
+            text-decoration: underline;
+        }}
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Bridge Connection Status 🌉</h1>
+        <p>Your local proxy server is running and intercepting OpenHands LLM calls.</p>
+        
+        <div class="status-item">
+            <span class="status-label">Proxy Server</span>
+            <span class="badge online">Active</span>
+        </div>
+        
+        <div class="status-item">
+            <span class="status-label">Proxy Port</span>
+            <span class="badge online">{self.server.server_address[1]}</span>
+        </div>
+        
+        <div class="status-item">
+            <span class="status-label">OpenHands URL</span>
+            <span class="badge online">{OPENHANDS_URL}</span>
+        </div>
+
+        <div class="status-item">
+            <span class="status-label">OpenHands Connection</span>
+            <span class="badge {'healthy' if 'Healthy' in openhands_status else 'warning'}">{openhands_status}</span>
+        </div>
+
+        <div class="footer">
+            Powered by <a href="https://github.com/Yuggohel2/openhands-ide-bridge" target="_blank">OpenHands IDE Bridge</a>
+        </div>
+    </div>
+</body>
+</html>"""
+            self.wfile.write(html.encode("utf-8"))
+        else:
+            self.send_response(404)
+            self.end_headers()
 
     def do_POST(self):
         if self.path in ("/v1/chat/completions", "/chat/completions"):

@@ -70,7 +70,11 @@ cd openhands-ide-bridge
 python llm_proxy.py
 ```
 
-### 2. Configure OpenHands
+### 2. Monitor Connection Health (Status Dashboard)
+Once the proxy is running, you can visit the local status dashboard in your browser to verify connection health to the OpenHands server:
+👉 **[http://localhost:9999/status](http://localhost:9999/status)**
+
+### 3. Configure OpenHands
 Launch OpenHands and tell it to send its API requests to the proxy:
 
 #### A. If Running OpenHands in Docker (Recommended)
@@ -92,8 +96,16 @@ Simply enter the following details in the settings panel:
 * **API Base URL:** `http://host.docker.internal:9999/v1`
 * **API Key:** `dummy`
 
-### 3. Expose OpenHands to your IDE (Optional MCP Server Setup)
-To allow your IDE assistant to control OpenHands, add the MCP server configuration to your IDE settings (e.g. `mcp_config.json`):
+### 4. Expose OpenHands to your IDE (Optional MCP Server Setup)
+To allow your IDE assistant to control OpenHands, you can run the auto-configuration utility:
+
+```bash
+# Run the auto-configurator
+python configure.py
+```
+This utility automatically detects common MCP client setups (such as VS Code's Cline/Roo-Cline or Claude Desktop) and registers the `openhands` server configuration with the correct script paths.
+
+Alternatively, you can add it manually to your IDE settings (e.g. `mcp_config.json`):
 
 ```json
 "openhands": {

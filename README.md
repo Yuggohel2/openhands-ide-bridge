@@ -1,6 +1,7 @@
 # OpenHands IDE Bridge 🌉
 
 > **Are you tired of getting your API keys exhausted by OpenHands?**  
+> **Run OpenHands completely keyless using your IDE's native model—stop paying for two subscriptions (one for your IDE chat and another for raw LLM API keys)!**  
 > Meet the solution that routes OpenHands calls directly to your **IDE's native LLM**—no extra API keys, no usage limits, and completely free.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
